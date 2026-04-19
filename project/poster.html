@@ -30,6 +30,13 @@
     margin: 0;
   }
 
+  /* Print-safe color rendering — keep tints / backgrounds when exporting PDF */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
   :root {
     --paper:      #fbf9f4;
     --paper-2:    #f3efe6;
@@ -77,9 +84,32 @@
     outline: 2px solid var(--ink);
     outline-offset: -1px;
   }
+  /* ---- Print: scale the EXACT same 1920x1440 canvas up to 48x36in.
+     This preserves every layout detail pixel-for-pixel; only the
+     physical output size changes. 1920px / 20in * 2.4 = 48in.
+     (1 CSS px = 1/96in, so 1920px = 20in natively; scale 2.4x.) */
   @media print {
-    html, body { background: var(--paper); }
-    .poster { margin: 0; box-shadow: none; width: 48in; height: 36in; padding: 0.55in 0.65in 0.5in; }
+    html, body {
+      background: var(--paper) !important;
+      width: 48in;
+      height: 36in;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: hidden !important;
+    }
+    .poster {
+      margin: 0 !important;
+      box-shadow: none !important;
+      outline: none !important;
+      width: 1920px !important;
+      height: 1440px !important;
+      transform: scale(2.4);
+      transform-origin: top left;
+      /* pin to top-left of the 48x36in page */
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
   }
 
   /* ---- Header ----------------------------------------------- */
@@ -252,20 +282,40 @@
 
   /* ---- Core question card ----------------------------------- */
   .hero-quote {
-    padding: 4px 2px 2px;
+    padding: 8px 4px 8px 14px;
+    position: relative;
+  }
+  .hero-quote::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 8px;
+    bottom: 8px;
+    width: 3px;
+    background: var(--accent);
+    border-radius: 2px;
   }
   .hero-quote .q {
     font-family: var(--serif);
-    font-size: 22px;
-    line-height: 1.2;
+    font-size: 21px;
+    line-height: 1.3;
     font-weight: 600;
     color: var(--ink);
     margin: 0;
     letter-spacing: -0.005em;
   }
-  .hero-quote .q .pull {
-    background: linear-gradient(transparent 62%, oklch(0.94 0.03 255) 62%);
-    padding: 0 2px;
+  .hero-quote .q .understrike {
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+    text-decoration-thickness: 2.5px;
+    text-underline-offset: 4px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .hero-quote .q .accent {
+    font-style: italic;
+    color: var(--accent);
+    font-weight: 700;
   }
 
   /* ---- TL;DR bullets ---------------------------------------- */
@@ -358,6 +408,10 @@
     color: var(--accent);
     letter-spacing: 0.18em;
     text-transform: uppercase;
+  }
+  .eco-inner.center {
+    justify-content: center;
+    align-items: center;
   }
   .eco-inner {
     background: var(--paper-2);
@@ -969,51 +1023,152 @@
     line-height: 1.2;
   }
 
-  /* ---- Right col: extensions -------------------------------- */
+  /* ---- Right col: ecosystem items --------------------------- */
   .ext-item {
-    display: grid;
-    grid-template-columns: 88px 1fr;
-    gap: 14px;
-    align-items: start;
     padding: 10px 0;
     border-top: 1px solid #e3dfd5;
   }
   .ext-item:first-child { border-top: none; padding-top: 0; }
-  .ext-thumb {
-    width: 88px;
-    height: 72px;
-    background:
-      repeating-linear-gradient(135deg, var(--paper-2) 0 8px, #e6e0d2 8px 16px);
-    border: 1px solid var(--ink-2);
-    border-radius: 3px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--mono);
-    font-size: 9.5px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    text-align: center;
-    padding: 4px;
-  }
-  .ext-item h3 {
-    font-family: var(--serif);
-    font-size: 20px;
-    font-weight: 700;
-    margin: 0 0 3px;
-    color: var(--ink);
-  }
-  .ext-item p { font-size: 14.5px; line-height: 1.38; margin: 0; color: var(--ink-2); }
   .ext-item .kicker {
     font-family: var(--mono);
-    font-size: 10.5px;
-    font-weight: 600;
+    font-size: 10px;
+    font-weight: 700;
     color: var(--accent);
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    margin-bottom: 2px;
+    margin-bottom: 3px;
     display: block;
+  }
+  .ext-item h3 {
+    font-family: var(--serif);
+    font-size: 19px;
+    font-weight: 700;
+    margin: 0 0 5px;
+    color: var(--ink);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+  .ext-item .ext-body {
+    font-size: 13px;
+    line-height: 1.38;
+    margin: 5px 0 0;
+    color: var(--ink-2);
+  }
+  .ext-item .ext-body em.hl { font-style: normal; color: var(--accent); font-weight: 600; }
+
+  /* Event meta pills (venue, dates, locations) */
+  .event-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin: 0 0 6px;
+  }
+  .meta-badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    background: var(--paper-2);
+    color: var(--ink);
+    border: 1px solid var(--ink-2);
+    padding: 2px 7px;
+    border-radius: 3px;
+    letter-spacing: 0.03em;
+  }
+  .meta-badge.date {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: #fff;
+  }
+
+  /* Workshop — dual-deadline card */
+  .event-deadlines {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin: 4px 0 4px;
+  }
+  .deadline {
+    background: var(--accent-bg);
+    border-left: 3px solid var(--accent);
+    padding: 5px 8px 6px;
+    border-radius: 2px;
+  }
+  .deadline-label {
+    display: block;
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    line-height: 1;
+  }
+  .deadline-date {
+    display: block;
+    font-family: var(--serif);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-top: 2px;
+    letter-spacing: -0.005em;
+    line-height: 1.15;
+  }
+
+  /* Hackathon — starter kits list */
+  .starter-kits {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 5px;
+  }
+  .kit {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px;
+    align-items: baseline;
+    padding: 5px 9px;
+    background: var(--paper-2);
+    border-left: 2px solid var(--accent);
+    border-radius: 2px;
+    font-size: 11.5px;
+    line-height: 1.3;
+  }
+  .kit-name {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0;
+    white-space: nowrap;
+  }
+  .kit-desc { color: var(--ink-2); }
+
+  /* SDK — feature list */
+  .sdk-features {
+    list-style: none;
+    padding: 0;
+    margin: 5px 0 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px 10px;
+  }
+  .sdk-features li {
+    display: grid;
+    grid-template-columns: 10px 1fr;
+    gap: 5px;
+    align-items: baseline;
+    font-size: 11.5px;
+    line-height: 1.3;
+    color: var(--ink);
+    margin: 0;
+    padding: 1px 0;
+  }
+  .sdk-features li::before {
+    content: "▸";
+    color: var(--accent);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
   }
 
   /* ---- Resources -------------------------------------------- */
@@ -1144,9 +1299,64 @@
   /* small inline math helper */
   .math { font-family: "Latin Modern Math", "Cambria Math", var(--serif); font-style: italic; }
   sub, sup { line-height: 0; }
+
+  /* ---- Screen-only print-hint banner ------------------------ */
+  .print-hint {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: #141414;
+    color: #fbf9f4;
+    font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.45;
+    padding: 10px 18px;
+    display: flex;
+    gap: 14px;
+    align-items: baseline;
+    flex-wrap: wrap;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
+  .print-hint strong {
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    font-size: 11.5px;
+    color: oklch(0.80 0.10 85);
+  }
+  .print-hint em {
+    font-style: normal;
+    font-weight: 600;
+    color: #fbf9f4;
+  }
+  .print-hint kbd {
+    font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+    font-size: 12px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 3px;
+    padding: 1px 6px;
+    font-weight: 600;
+  }
+  @media print {
+    .print-hint { display: none !important; }
+  }
+  /* Give the page a little top buffer so banner doesn't overlap on screen */
+  body { padding-top: 46px; }
+  @media print { body { padding-top: 0 !important; } }
 </style>
 </head>
-<body data-cc-id="cc-1" style="cursor: crosshair;">
+<body>
+<!-- Print-only helper banner (hidden on print) -->
+<div class="print-hint">
+  <strong>Print / Save as PDF:</strong>
+  <span>Press <kbd>⌘/Ctrl&nbsp;+&nbsp;P</kbd> &nbsp;→&nbsp; Destination: <em>Save as PDF</em> &nbsp;·&nbsp;
+  Paper size: <em>Custom 48&nbsp;×&nbsp;36&nbsp;in</em> (or your plotter size) &nbsp;·&nbsp;
+  Margins: <em>None</em> &nbsp;·&nbsp; Scale: <em>Default / 100%</em> &nbsp;·&nbsp;
+  Background graphics: <em>On</em>.</span>
+</div>
 
 <div class="poster" data-screen-label="01 ICLR Poster" data-cc-id="cc-9">
 
@@ -1196,8 +1406,7 @@
           <h2 class="section-title">Core Question</h2>
         </div>
         <div class="hero-quote">
-          <p class="q">Can AI systems reliably <span class="pull">predict the future</span>
-            by connecting the dots across existing real-world information?</p>
+          <p class="q">Can <span class="accent">AI</span> systems reliably <span class="understrike">predict the future</span> by <span class="understrike">connecting the dots</span> across existing <span class="understrike">real-world information</span>?</p>
         </div>
       </section>
 
@@ -1302,7 +1511,7 @@
             <div class="sub">
               <div class="step-num">Step 2b · Agent Loop</div>
               <h3>Self-directed Context</h3>
-              <div class="eco-inner">
+              <div class="eco-inner center">
                 <div class="agent-loop">
                   <div class="al-row">
                     <span class="al-node">Plan</span>
@@ -1338,7 +1547,7 @@
             <div class="sub">
               <div class="step-num">Step 4</div>
               <h3>Evaluation</h3>
-              <div class="eco-inner" style="min-height:0; padding:3px;">
+              <div class="eco-inner center">
                 <div class="tri-wrap">
                   <svg class="tri" viewBox="0 0 160 140" aria-label="Three evaluation dimensions">
                     <defs>
@@ -1556,11 +1765,11 @@
           <div class="obs-right">
             <figure class="obs-fig">
               <img src="images/data_source_comparison.svg" alt="Context source comparison" class="obs-img">
-              <figcaption>Obs 1 · Context source comparison</figcaption>
+              <figcaption>Fig 1 · Influence of market data in context</figcaption>
             </figure>
             <figure class="obs-fig">
               <img src="images/time_bins_brier_score.svg" alt="Brier score vs. time to resolution" class="obs-img">
-              <figcaption>Obs 2 · Brier score vs. time to resolution</figcaption>
+              <figcaption>Fig 2 · Brier score vs. time to resolution</figcaption>
             </figure>
           </div>
         </div>
@@ -1578,30 +1787,56 @@
         </div>
 
         <div class="ext-item">
-          <div class="ext-thumb">TRADING<br>ENV PLOT</div>
-          <div>
-            <span class="kicker">Environment</span>
-            <h3>Trading Environment</h3>
-            <p>A simulated prediction-market environment that turns a forecast into a sequence of bets — letting us score agents on portfolio return, drawdown, and Sharpe-style risk, not just scalar accuracy.</p>
+          <span class="kicker">Workshop</span>
+          <h3>Forecasting as a New Frontier of Intelligence</h3>
+          <div class="event-meta">
+            <span class="meta-badge">ICML 2026</span>
+            <span class="meta-badge">Seoul, Korea</span>
+          </div>
+          <div class="event-deadlines">
+            <div class="deadline">
+              <span class="deadline-label">Abstract due</span>
+              <span class="deadline-date">May 15, 2026</span>
+            </div>
+            <div class="deadline">
+              <span class="deadline-label">Full paper</span>
+              <span class="deadline-date">May 20, 2026</span>
+            </div>
+          </div>
+          <p class="ext-body">Submit via <em class="hl">OpenReview</em> · poster + oral tracks · best-paper award.</p>
+        </div>
+
+        <div class="ext-item">
+          <span class="kicker">Hackathon</span>
+          <h3>Prophet Hacks · 30-hour build</h3>
+          <div class="event-meta">
+            <span class="meta-badge date">May 16 – 17, 2026</span>
+            <span class="meta-badge">UChicago · San Francisco · Remote</span>
+          </div>
+          <p class="ext-body">Build an AI forecasting agent, then benchmark it live on <em class="hl">Prophet Arena</em>. Two starter kits to fork:</p>
+          <div class="starter-kits">
+            <div class="kit">
+              <span class="kit-name">ai-prophet</span>
+              <span class="kit-desc">Full forecasting + trading system — fork, adapt, run.</span>
+            </div>
+            <div class="kit">
+              <span class="kit-name">ai-prophet-core</span>
+              <span class="kit-desc">Core SDK &amp; API client — build your own from scratch.</span>
+            </div>
           </div>
         </div>
 
         <div class="ext-item">
-          <div class="ext-thumb">HACKATHON<br>LOGO</div>
-          <div>
-            <span class="kicker">Community</span>
-            <h3>Forecasting Hackathon</h3>
-            <p>A recurring open competition where teams ship agents against live markets. Shared leaderboard, shared data, new events weekly.</p>
-          </div>
-        </div>
-
-        <div class="ext-item">
-          <div class="ext-thumb">AGENT<br>DIAGRAM</div>
-          <div>
-            <span class="kicker">Agents</span>
-            <h3>AI-Prophet &amp; Mini-Prophet</h3>
-            <p><strong>AI-Prophet</strong> is our reference trading agent with retrieval, reasoning, and position-sizing. <strong>Mini-Prophet</strong> is a lightweight harness for rapid iteration on forecasting prompts.</p>
-          </div>
+          <span class="kicker">SDK</span>
+          <h3>AI-Prophet SDK</h3>
+          <p class="ext-body">A complete suite for building forecasting and trading agents — plug into <em class="hl">Prophet Arena</em> with a few lines.</p>
+          <ul class="sdk-features">
+            <li>LLM provider connectors</li>
+            <li>MCP-powered news retrieval</li>
+            <li>Structured forecasts &amp; trades</li>
+            <li>Plug-and-play agent templates</li>
+            <li>Native Prophet Arena sync</li>
+          </ul>
         </div>
       </section>
 
@@ -1690,10 +1925,10 @@
             <span class="q-badge">Q2</span>
             <span class="q-text">How do we design better <em class="hl">betting frameworks</em> to optimally convert <em class="hl">forecasts</em> into <em class="rust">profits</em>?</span>
           </li>
-          <li>
+          <!-- <li>
             <span class="q-badge">Q3</span>
             <span class="q-text">How can AI help us grow an <em class="hl">ecosystem</em> that extends <em class="rust">beyond existing prediction markets</em>?</span>
-          </li>
+          </li> -->
         </ul>
       </section>
 
