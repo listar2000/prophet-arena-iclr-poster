@@ -1,0 +1,1708 @@
+<!DOCTYPE html><html lang="en"><head>
+
+
+
+
+
+
+
+
+
+
+
+
+<meta charset="utf-8">
+<title>LLM-as-a-Prophet — ICLR 2026 Poster</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,800&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+  /* ================================================================
+     ICLR 2026 Poster — LLM-as-a-Prophet
+     Designed at 48" x 36" landscape (4:3). Rendered here at
+     1920 x 1440 for on-screen preview; @page rule handles print.
+     Aesthetic: warm-neutral paper, ink-black body, single
+     oklch indigo accent + muted amber for highlights.
+     ================================================================ */
+
+  @page {
+    size: 48in 36in;
+    margin: 0;
+  }
+
+  :root {
+    --paper:      #fbf9f4;
+    --paper-2:    #f3efe6;
+    --rule:       #1a1a1a;
+    --ink:        #141414;
+    --ink-2:      #3a3a3a;
+    --muted:      #6b6a63;
+    --accent:     oklch(0.45 0.14 255);      /* deep indigo */
+    --accent-2:   oklch(0.72 0.10 255);      /* faded indigo */
+    --accent-bg:  oklch(0.94 0.03 255);      /* tint */
+    --amber:      oklch(0.62 0.14 65);       /* muted amber */
+    --amber-bg:   oklch(0.95 0.04 85);
+    --rust:       oklch(0.48 0.16 35);       /* deep burnt-orange — distinct from --amber on --amber-bg */
+    --good:       oklch(0.55 0.12 155);
+    --bad:        oklch(0.55 0.18 25);
+
+    --serif:  "Fraunces", "Source Serif Pro", Georgia, serif;
+    --sans:   "Inter", "Helvetica Neue", Arial, sans-serif;
+    --mono:   "JetBrains Mono", ui-monospace, Menlo, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #2a2a28;
+    font-family: var(--sans);
+    color: var(--ink);
+  }
+
+  /* ---- Poster canvas ---------------------------------------- */
+  .poster {
+    width: 1920px;
+    height: 1440px;
+    margin: 24px auto;
+    background: var(--paper);
+    position: relative;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.35);
+    padding: 40px 48px 36px;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 22px;
+    overflow: hidden;
+    outline: 2px solid var(--ink);
+    outline-offset: -1px;
+  }
+  @media print {
+    html, body { background: var(--paper); }
+    .poster { margin: 0; box-shadow: none; width: 48in; height: 36in; padding: 0.55in 0.65in 0.5in; }
+  }
+
+  /* ---- Header ----------------------------------------------- */
+  header.masthead {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 36px;
+    align-items: center;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--rule);
+    position: relative;
+  }
+
+  .qr-pair {
+    display: flex;
+    flex-direction: row;
+    gap: 22px;
+    align-items: flex-start;
+  }
+
+  .qr {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .qr-box {
+    width: 150px;
+    height: 150px;
+    background: #fff;
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    padding: 8px;
+    display: block;
+  }
+  .qr-box img { width: 100%; height: 100%; display: block; }
+  .qr-label {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    text-transform: uppercase;
+  }
+  .qr.amber .qr-label { color: var(--amber); }
+  .qr.amber .qr-box { border-color: var(--amber); }
+
+  .title-block { text-align: left; }
+  .venue-line {
+    font-family: var(--mono);
+    font-size: 14px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .venue-line .sep { color: var(--muted); margin: 0 10px; }
+
+  h1.title {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 78px;
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    margin: 0 0 6px;
+    color: var(--ink);
+  }
+  h1.title .accent {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .subtitle {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 30px;
+    line-height: 1.15;
+    color: var(--ink-2);
+    margin: 0 0 14px;
+    max-width: 1100px;
+  }
+
+  .authors {
+    font-family: var(--sans);
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--ink);
+    line-height: 1.4;
+  }
+  .authors sup { font-weight: 600; color: var(--accent); font-size: 0.7em; }
+  .affiliations {
+    font-size: 16px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .affiliations sup { color: var(--accent); font-weight: 700; }
+
+  /* ---- Body grid (3 columns) -------------------------------- */
+  main.body {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr 0.8fr;
+    gap: 28px;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .col { display: flex; flex-direction: column; gap: 12px; min-width: 0; min-height: 0; overflow: hidden; }
+  .col > section.card:last-child { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; }
+  .col > section.card:last-child > *:last-child { flex: 1 1 auto; min-height: 0; }
+
+  /* ---- Section card ----------------------------------------- */
+  section.card {
+    background: #fff;
+    border: 1.5px solid var(--ink);
+    border-radius: 4px;
+    padding: 14px 18px 16px;
+    position: relative;
+  }
+  section.card.tint { background: var(--accent-bg); border-color: var(--accent); }
+  section.card.tint.amber { background: var(--amber-bg); border-color: var(--amber); }
+  section.card.tint.amber .section-kicker,
+  section.card.tint.amber .section-kicker .num { color: var(--amber); }
+  section.card.tint.amber .q-badge { color: var(--amber); border-color: var(--amber); }
+  section.card.paper { background: transparent; border: none; padding: 4px 4px; }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin: 0 0 10px;
+    padding-bottom: 8px;
+    border-bottom: 1.5px solid var(--rule);
+  }
+  .section-kicker {
+    font-family: var(--serif);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -0.01em;
+    line-height: 1;
+  }
+  .section-kicker .num {
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+    margin-right: 8px;
+    opacity: 0.85;
+  }
+  h2.section-title { display: none; }
+
+  p, li { font-size: 15px; line-height: 1.38; color: var(--ink); }
+  p { margin: 0 0 6px; }
+  ul { margin: 0 0 4px; padding-left: 20px; }
+  li { margin-bottom: 3px; }
+  li::marker { color: var(--accent); }
+
+  .lead {
+    font-family: var(--serif);
+    font-size: 24px;
+    line-height: 1.25;
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .lead em { font-style: italic; color: var(--accent); }
+
+  strong { font-weight: 700; }
+  em.hl { font-style: normal; color: var(--accent); font-weight: 600; }
+  em.amber { font-style: normal; color: var(--amber); font-weight: 600; }
+  em.rust { font-style: normal; color: var(--rust); font-weight: 600; }
+
+  /* ---- Core question card ----------------------------------- */
+  .hero-quote {
+    padding: 4px 2px 2px;
+  }
+  .hero-quote .q {
+    font-family: var(--serif);
+    font-size: 22px;
+    line-height: 1.2;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0;
+    letter-spacing: -0.005em;
+  }
+  .hero-quote .q .pull {
+    background: linear-gradient(transparent 62%, oklch(0.94 0.03 255) 62%);
+    padding: 0 2px;
+  }
+
+  /* ---- TL;DR bullets ---------------------------------------- */
+  .tldr-list { list-style: none; padding: 0; margin: 0; }
+  .tldr-list li {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 8px;
+    align-items: start;
+    margin-bottom: 7px;
+    font-size: 15px;
+    line-height: 1.35;
+  }
+  .tldr-list li:last-child { margin-bottom: 0; }
+  .tldr-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--accent-bg);
+    border-radius: 3px;
+    text-align: center;
+    padding: 4px 0;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    margin-top: 2px;
+  }
+
+  /* ---- Ecosystem diagram ------------------------------------ */
+  .eco {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-top: 4px;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  .eco > * { min-width: 0; }
+  .eco-step {
+    background: #fff;
+    border: 1.5px solid var(--ink);
+    border-radius: 4px;
+    padding: 8px 8px 10px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .eco-step .eco-inner { flex: 1 1 auto; }
+  /* Step 2 is split into two sub-boxes */
+  .eco-step.split { padding: 0; border: none; background: transparent; gap: 6px; display: flex; flex-direction: column; }
+  .eco-step.split > .sub {
+    background: #fff;
+    border: 1.5px solid var(--ink);
+    border-radius: 4px;
+    padding: 5px 7px 6px;
+    min-height: 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+  .eco-step.split > .sub.primary { flex: 1 1 62%; }
+  .eco-step.split > .sub.alt { flex: 1 1 38%; }
+  .eco-step.split > .sub.alt { background: var(--amber-bg); border-color: var(--amber); }
+  .eco-step.split .eco-inner { flex: 1 1 auto; }
+  .eco-step.split .step-num.alt { color: var(--amber); }
+  .eco-step .step-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .eco-step h3 {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 13px;
+    line-height: 1.1;
+    margin: 2px 0 4px;
+    color: var(--ink);
+  }
+  .eco-step .step-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .eco-inner {
+    background: var(--paper-2);
+    border-radius: 3px;
+    padding: 5px;
+    font-size: 11.5px;
+    line-height: 1.25;
+    min-height: 90px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .eco-caption {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border-top: 1px dashed var(--muted);
+    padding-top: 4px;
+    margin-top: 2px;
+  }
+  .eco-divider {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 5px 0 2px;
+    font-family: var(--mono);
+    font-size: 9.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    white-space: nowrap;
+  }
+  .eco-divider::before, .eco-divider::after {
+    content: "";
+    flex: 1;
+    height: 0;
+    border-top: 1px dashed var(--muted);
+  }
+  .pie-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 0 0;
+  }
+  .pie { width: 74px; height: 74px; display: block; }
+  .pie-legend {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1px;
+    font-family: var(--sans);
+    font-size: 9px;
+    color: var(--ink);
+    width: 100%;
+  }
+  .pie-legend li {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin: 0;
+    line-height: 1.15;
+    font-weight: 500;
+  }
+  .pie-legend .sw {
+    width: 6px; height: 6px; border-radius: 2px; display: inline-block;
+    border: 1px solid rgba(0,0,0,0.15);
+    flex: 0 0 auto;
+  }
+  .pie-legend em {
+    font-style: normal;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 8.5px;
+    margin-left: auto;
+  }
+  .tri-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4px 0 0;
+  }
+  .tri { width: 125px; height: auto; display: block; }
+  .market-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    background: #fff;
+    border: 1px solid var(--ink);
+    border-radius: 3px;
+    padding: 3px 6px;
+    font-size: 11.5px;
+    gap: 5px;
+  }
+  .market-row.win { background: oklch(0.94 0.05 155); border-color: var(--good); }
+  .price { font-family: var(--mono); font-weight: 700; color: var(--ink); }
+  .market-row.win .price { color: var(--good); }
+
+  .prompt-box {
+    background: #fff;
+    border: 1px solid var(--ink-2);
+    border-radius: 3px;
+    padding: 5px 7px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    line-height: 1.35;
+    color: var(--ink-2);
+  }
+  .prompt-box .tag { color: var(--accent); font-weight: 600; }
+
+  .pred-bars { display: flex; flex-direction: column; gap: 5px; }
+  .pred-bar {
+    position: relative;
+    background: var(--paper-2);
+    border: 1px solid var(--ink-2);
+    border-radius: 3px;
+    padding: 3px 6px;
+    font-size: 11.5px;
+    font-family: var(--mono);
+    font-weight: 600;
+    overflow: hidden;
+  }
+  .pred-bar .fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    background: var(--accent-bg);
+    z-index: 0;
+  }
+  .pred-bar span { position: relative; z-index: 1; }
+
+  .rationale {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    line-height: 1.3;
+    color: var(--ink-2);
+    background: #fff;
+    border: 1px solid var(--ink-2);
+    border-radius: 3px;
+    padding: 4px 6px;
+    margin-top: 2px;
+  }
+  .rationale .r-tag {
+    color: var(--accent);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 8.5px;
+    margin-right: 4px;
+  }
+  .rationale em { font-style: italic; color: var(--accent); }
+
+  .chip {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--accent-bg);
+    color: var(--accent);
+    padding: 3px 7px;
+    border-radius: 3px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin: 0 3px 3px 0;
+  }
+  .chip.amber { background: var(--amber-bg); color: var(--amber); }
+
+  .eco-arrow {
+    position: absolute;
+    right: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    background: var(--paper);
+    border-top: 2px solid var(--ink);
+    border-right: 2px solid var(--ink);
+    transform: translateY(-50%) rotate(45deg);
+    z-index: 5;
+  }
+  .eco-arrow.alt {
+    border-color: var(--amber);
+  }
+  .eco-step:last-child .eco-arrow { display: none; }
+
+  /* Agent loop visual */
+  .agent-loop {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 2px 0;
+    min-width: 0;
+  }
+  .al-row {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    min-width: 0;
+  }
+  .al-node {
+    font-family: var(--mono);
+    font-size: 8px;
+    font-weight: 700;
+    text-align: center;
+    padding: 2px 4px;
+    background: #fff;
+    border: 1px solid var(--accent);
+    border-radius: 3px;
+    color: var(--ink);
+    white-space: nowrap;
+    flex: 0 1 auto;
+  }
+  .al-node.tool { background: #fff; }
+  .al-arr {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--accent);
+    font-weight: 700;
+    flex: 0 0 auto;
+  }
+  .al-loop-line {
+    position: relative;
+    height: 15px;
+    margin: 0 6px;
+    border-left: 1.5px dashed var(--accent);
+    border-right: 1.5px dashed var(--accent);
+    border-bottom: 1.5px dashed var(--accent);
+    border-radius: 0 0 6px 6px;
+  }
+  .al-loop-line::after {
+    content: "↻ loop until confident";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--accent-bg);
+    font-family: var(--mono);
+    font-size: 8.5px;
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 1px 5px;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+
+  /* Event-mix submix block (Step 1) — distinct from the tennis example */
+  .eco-submix {
+    margin-top: 6px;
+    padding: 5px 7px 6px;
+    background: #fff;
+    border: 1px dashed var(--ink-2);
+    border-radius: 3px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .eco-submix .submix-label {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-align: center;
+    padding-bottom: 3px;
+    border-bottom: 1px dashed var(--muted);
+  }
+  .cat-dist {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .cat-dist li {
+    display: grid;
+    grid-template-columns: 10px 1fr auto;
+    gap: 8px;
+    align-items: center;
+    padding: 3px 2px;
+    font-family: var(--sans);
+    font-size: 11px;
+    line-height: 1.15;
+    color: var(--ink);
+    border-bottom: 1px dashed #e8e2d4;
+    margin: 0;
+  }
+  .cat-dist li:last-child { border-bottom: none; }
+  .cat-dist .sw {
+    width: 9px;
+    height: 9px;
+    border-radius: 2px;
+    border: 1px solid rgba(0,0,0,0.15);
+  }
+  .cat-dist .cat-name {
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .cat-dist .cat-pct {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+  }
+
+  /* ---- Main results table ----------------------------------- */
+  .results-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    margin-top: 2px;
+  }
+  .results-table th, .results-table td {
+    padding: 5px 8px;
+    text-align: right;
+    border-bottom: 1px solid #e3dfd5;
+  }
+  .results-table th {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    border-bottom: 1.5px solid var(--ink);
+    text-align: right;
+  }
+  .results-table th:first-child,
+  .results-table td:first-child { text-align: left; }
+  .results-table td:first-child { font-weight: 600; }
+  .results-table tr.market td { background: var(--accent-bg); font-weight: 700; }
+  .results-table tr.best td { color: var(--good); font-weight: 700; }
+  .results-table tr.best-llm td { color: var(--accent); font-weight: 600; }
+  .results-table tr.best-llm td:first-child { font-weight: 700; }
+  .results-table tr.best-os td { color: var(--rust); font-weight: 600; }
+  .results-table tr.best-os td:first-child { font-weight: 700; font-style: italic; }
+  .results-table td .kind {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 1px 5px;
+    margin-right: 6px;
+    border-radius: 2px;
+    vertical-align: 1px;
+  }
+  .results-table tr.market .kind { background: var(--accent); color: #fff; }
+  .results-table tr.best .kind { background: var(--good); color: #fff; }
+  .results-table tr.best-llm .kind { background: var(--accent); color: #fff; }
+  .results-table tr.best-os .kind { background: var(--rust); color: #fff; }
+  .results-table .mono { font-family: var(--mono); }
+
+  /* ---- Benchmark comparison table --------------------------- */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 4px;
+    table-layout: fixed;
+  }
+  .compare-table th, .compare-table td {
+    padding: 8px 3px;
+    text-align: center;
+    border-bottom: 1px solid #e3dfd5;
+    line-height: 1.2;
+  }
+  .compare-table th:first-child,
+  .compare-table td:first-child {
+    text-align: left;
+    padding-left: 2px;
+  }
+  .compare-table col.name-col { width: 27%; }
+  .compare-table col.feat-col { width: 14.6%; }
+  .compare-table thead th {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1.5px solid var(--ink);
+    vertical-align: bottom;
+    padding-bottom: 7px;
+  }
+  .compare-table thead th:first-child {
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    color: var(--ink);
+  }
+  .compare-table tbody td:first-child {
+    font-family: var(--serif);
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+  }
+  .compare-table td.yes {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 17px;
+    line-height: 1;
+  }
+  .compare-table td.no {
+    color: var(--muted);
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 1;
+  }
+  .compare-table tr.ours td { background: var(--accent-bg); }
+  .compare-table tr.ours td:first-child {
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0;
+  }
+  .compare-table tr.ours td.yes { font-size: 18px; }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-note {
+    font-family: var(--sans);
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--ink-2);
+    margin: 0 0 8px;
+  }
+  .compare-note em.hl { font-style: normal; color: var(--accent); font-weight: 600; }
+
+  .stat-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .stat {
+    background: var(--paper-2);
+    border-left: 3px solid var(--accent);
+    padding: 6px 9px;
+  }
+  .stat .v {
+    font-family: var(--serif);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .stat .k {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 3px;
+  }
+
+  /* ---- Metric blocks ---------------------------------------- */
+  .metric {
+    border-top: 1px solid #e3dfd5;
+    padding: 7px 0 5px;
+  }
+  .metric:first-child { border-top: none; padding-top: 0; }
+  .metric h3 {
+    font-family: var(--serif);
+    font-size: 17px;
+    font-weight: 700;
+    margin: 0 0 3px;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .metric h3 .num {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent);
+    background: var(--accent-bg);
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-weight: 700;
+  }
+  .metric p { font-size: 13.5px; line-height: 1.35; margin: 0 0 4px; }
+  .formula {
+    font-family: var(--mono);
+    font-size: 13px;
+    background: var(--paper-2);
+    padding: 6px 10px;
+    border-radius: 3px;
+    display: inline-block;
+    color: var(--ink);
+  }
+  .formula .sub { font-size: 0.7em; vertical-align: sub; }
+  .formula .sup { font-size: 0.7em; vertical-align: super; }
+
+  /* two-up row for M1 + M2 */
+  .metric-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    border-top: 1px solid #e3dfd5;
+    padding-top: 7px;
+    margin-top: 0;
+  }
+  .metric-row > .metric {
+    border-top: none;
+    padding: 0;
+  }
+  .metric-row > .metric + .metric {
+    border-left: 1px solid #e3dfd5;
+    padding-left: 14px;
+  }
+  .metric-row .metric h3 { font-size: 15.5px; gap: 6px; }
+  .metric-row .metric h3 > span[style*="margin-left"] { font-size: 10.5px; }
+  .metric-row .formula {
+    display: block;
+    font-size: 11px;
+    padding: 5px 7px;
+    white-space: nowrap;
+    overflow-x: auto;
+  }
+
+  /* ---- Takeaways -------------------------------------------- */
+  .takeaways {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .takeaways li {
+    display: grid;
+    grid-template-columns: 34px 1fr;
+    gap: 10px;
+    align-items: start;
+  }
+  .takeaways .badge {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    background: var(--accent);
+    border-radius: 3px;
+    text-align: center;
+    padding: 2px 0 4px;
+    line-height: 1;
+  }
+  .takeaways .t-title {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--ink);
+    display: block;
+    margin-bottom: 1px;
+  }
+  .takeaways .t-body { font-size: 13.5px; line-height: 1.35; color: var(--ink-2); }
+
+  /* ---- Observations split (60 / 40 inside the card) --------- */
+  .obs-split {
+    display: grid;
+    grid-template-columns: 48% 52%;
+    gap: 14px;
+    align-items: stretch;
+    min-height: 0;
+  }
+  .obs-left { min-width: 0; display: flex; flex-direction: column; }
+  .obs-right {
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-right: 10px;
+  }
+  .obs-fig {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    gap: 3px;
+  }
+  /* Obs 1 is a wide panoramic chart (~3.4:1); Obs 2 is closer to square (~1.6:1).
+     Give Obs 2 roughly 2× the vertical share so it isn't squeezed. */
+  .obs-right > .obs-fig:nth-child(1) { flex: 1 1 0; }
+  .obs-right > .obs-fig:nth-child(2) { flex: 2 1 0; }
+  .obs-fig .obs-img {
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    background: #fff;
+    border: 1px solid var(--ink-2);
+    border-radius: 3px;
+    display: block;
+    object-fit: contain;
+    object-position: center;
+    padding: 4px;
+  }
+  .obs-fig figcaption {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    text-align: center;
+    flex: 0 0 auto;
+    line-height: 1.2;
+  }
+
+  /* ---- Right col: extensions -------------------------------- */
+  .ext-item {
+    display: grid;
+    grid-template-columns: 88px 1fr;
+    gap: 14px;
+    align-items: start;
+    padding: 10px 0;
+    border-top: 1px solid #e3dfd5;
+  }
+  .ext-item:first-child { border-top: none; padding-top: 0; }
+  .ext-thumb {
+    width: 88px;
+    height: 72px;
+    background:
+      repeating-linear-gradient(135deg, var(--paper-2) 0 8px, #e6e0d2 8px 16px);
+    border: 1px solid var(--ink-2);
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 9.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-align: center;
+    padding: 4px;
+  }
+  .ext-item h3 {
+    font-family: var(--serif);
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 3px;
+    color: var(--ink);
+  }
+  .ext-item p { font-size: 14.5px; line-height: 1.38; margin: 0; color: var(--ink-2); }
+  .ext-item .kicker {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+    display: block;
+  }
+
+  /* ---- Resources -------------------------------------------- */
+  .links-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 14px;
+  }
+  .link-row {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 8px;
+    align-items: baseline;
+    font-size: 13.5px;
+    line-height: 1.3;
+  }
+  .link-row .icon {
+    width: 24px; height: 24px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 3px;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .link-row .label {
+    font-weight: 600;
+    color: var(--ink);
+    display: block;
+  }
+  .link-row .url {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    word-break: break-all;
+  }
+
+  /* ---- Further Questions ------------------------------------ */
+  .questions {
+    list-style: none;
+    padding: 0;
+    margin: 2px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .questions li {
+    display: grid;
+    grid-template-columns: 42px 1fr;
+    gap: 12px;
+    align-items: start;
+  }
+  .q-badge {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    background: #fff;
+    border: 1.5px solid var(--accent);
+    border-radius: 3px;
+    text-align: center;
+    padding: 5px 0 6px;
+    line-height: 1;
+    letter-spacing: 0.06em;
+  }
+  .q-text {
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.3;
+    color: var(--ink);
+    font-weight: 500;
+    letter-spacing: -0.005em;
+  }
+  .q-text .q-opts {
+    display: block;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-2);
+    margin-top: 3px;
+    letter-spacing: 0;
+  }
+  .q-text .q-opts .opt {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    background: #fff;
+    color: var(--accent);
+    border: 1px solid var(--accent-2);
+    border-radius: 3px;
+    padding: 2px 6px;
+    margin: 2px 4px 0 0;
+    letter-spacing: 0.02em;
+  }
+
+  /* ---- Leaderboard histogram chart -------------------------- */
+  .leaderboard-chart {
+    width: 100%;
+    height: auto;
+    display: block;
+    margin: 6px 0 8px;
+  }
+  .leaderboard-chart .axis-grid { stroke: #d8d2c4; stroke-dasharray: 3 3; stroke-width: 0.8; }
+  .leaderboard-chart .axis-base { stroke: var(--ink); stroke-width: 1.2; }
+  .leaderboard-chart .axis-tick { font-family: var(--mono); font-size: 9.5px; fill: var(--muted); }
+  .leaderboard-chart .axis-title { font-family: var(--sans); font-size: 11px; font-weight: 700; fill: var(--ink); letter-spacing: 0.03em; }
+  /* Per-company bar colors */
+  .leaderboard-chart .bar-anthropic { fill: oklch(0.60 0.16 45); }    /* warm orange */
+  .leaderboard-chart .bar-openai    { fill: oklch(0.50 0.11 170); }   /* teal */
+  .leaderboard-chart .bar-gemini    { fill: oklch(0.53 0.17 255); }   /* blue */
+  .leaderboard-chart .bar-kimi      { fill: oklch(0.48 0.16 295); }   /* purple */
+  .leaderboard-chart .bar-foresight { fill: oklch(0.60 0.14 115); }   /* yellow-green */
+  .leaderboard-chart .value { font-family: var(--mono); font-size: 9px; font-weight: 700; fill: #fff; letter-spacing: 0.01em; }
+  .leaderboard-chart .value-se { font-family: var(--mono); font-size: 7px; font-weight: 600; fill: #fff; fill-opacity: 0.88; letter-spacing: 0.01em; }
+  .leaderboard-chart .model-name { font-family: var(--sans); font-size: 9.5px; font-weight: 600; fill: var(--ink); }
+  .leaderboard-chart .model-sub { font-family: var(--sans); font-size: 8.5px; font-weight: 400; fill: var(--muted); }
+
+  .footnote {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+
+  /* small inline math helper */
+  .math { font-family: "Latin Modern Math", "Cambria Math", var(--serif); font-style: italic; }
+  sub, sup { line-height: 0; }
+</style>
+</head>
+<body data-cc-id="cc-1" style="cursor: crosshair;">
+
+<div class="poster" data-screen-label="01 ICLR Poster" data-cc-id="cc-9">
+
+  <!-- ============ HEADER ============ -->
+  <header class="masthead" data-cc-id="cc-2">
+    <div class="title-block">
+      <div class="venue-line" data-cc-id="cc-1" style="">
+        ICLR 2026 <span class="sep">·</span> Poster <span class="sep">·</span> Brazil - Rio&nbsp;de janeiro</div>
+      <h1 class="title">LLM-as-a-<span class="accent">Prophet</span></h1>
+      <p class="subtitle">Understanding Predictive Intelligence with <em>Prophet&nbsp;Arena</em></p>
+      <div class="authors">
+        Qingchuan Yang<sup>1</sup> &nbsp; Simon Mahns<sup>2</sup> &nbsp; Sida Li<sup>3</sup> &nbsp;
+        Anri Gu<sup>3</sup> &nbsp; Jibang Wu<sup>3</sup> &nbsp; Haifeng Xu<sup>3</sup>
+      </div>
+      <div class="affiliations">
+        <sup>1</sup> University of Southern California &nbsp;·&nbsp;
+        <sup>2</sup> Axiom AI &nbsp;·&nbsp;
+        <sup>3</sup> University of Chicago
+      </div>
+    </div>
+
+    <div class="qr-pair">
+      <div class="qr">
+        <div class="qr-box"><img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&amp;margin=0&amp;ecc=M&amp;data=https%3A%2F%2Fprophetarena.co" alt="prophetarena.co QR"></div>
+        <div class="qr-label">Benchmark ↗</div>
+      </div>
+      <div class="qr">
+        <div class="qr-box"><img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&amp;margin=0&amp;ecc=M&amp;data=https%3A%2F%2Fprophethacks.com" alt="prophethacks.com QR"></div>
+        <div class="qr-label">Hackathon ↗</div>
+      </div>
+      <div class="qr amber">
+        <div class="qr-box"><img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&amp;margin=0&amp;ecc=M&amp;data=https%3A%2F%2Fforecasting-workshop.github.io%2F" alt="ICML Workshop QR"></div>
+        <div class="qr-label">ICML Workshop ↗</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ BODY: 3 COLUMNS ============ -->
+  <main class="body">
+
+    <!-- ========== LEFT COLUMN ========== -->
+    <div class="col" data-cc-id="cc-4">
+
+      <section class="card tint">
+        <div class="section-head">
+          <span class="section-kicker"><span class="num">01</span>Core Question</span>
+          <h2 class="section-title">Core Question</h2>
+        </div>
+        <div class="hero-quote">
+          <p class="q">Can AI systems reliably <span class="pull">predict the future</span>
+            by connecting the dots across existing real-world information?</p>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-head">
+          <span class="section-kicker"><span class="num">02</span>Why Forecasting</span>
+          <h2 class="section-title">Verifiable. Uncheatable. Challenging.</h2>
+        </div>
+        <ul>
+          <li><strong>Verifiable.</strong> Outcomes resolve in the real world — no judge, no rubric gaming.</li>
+          <li><strong>Uncheatable.</strong> Future events cannot leak into training corpora.</li>
+          <li><strong>Challenging.</strong> Requires synthesizing news, reasoning under uncertainty, and calibrating beliefs.</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <div class="section-head">
+          <span class="section-kicker"><span class="num">TL;DR</span>What we built</span>
+          <h2 class="section-title">What we built</h2>
+        </div>
+        <ul class="tldr-list">
+          <li>
+            <span class="tldr-num">01</span>
+            <span>We built <em class="hl">Prophet Arena</em>, a live &amp; extensible benchmark that continuously collects real-world forecasting tasks across domains and evaluates base LLMs and agentic systems on their predictive intelligence.</span>
+          </li>
+          <li>
+            <span class="tldr-num">02</span>
+            <span>We incorporate multiple scoring metrics capturing <em class="hl">statistical accuracy</em>, <em class="hl">calibration</em>, and the <em class="hl">economic value</em> of probabilistic forecasts.</span>
+          </li>
+          <li>
+            <span class="tldr-num">03</span>
+            <span>We introduce the notion of <em class="hl">LLM-as-a-Prophet</em> and are actively building a full AI-forecasting ecosystem — forecasting data, environments, and agents.</span>
+          </li>
+        </ul>
+      </section>
+
+      <section class="card" data-cc-id="cc-5">
+        <div class="section-head" data-cc-id="cc-3">
+          <span class="section-kicker" data-cc-id="cc-2" style=""><span class="num">03</span>Our Pipeline</span>
+          <h2 class="section-title">Our Ecosystem</h2>
+        </div>
+        <div class="eco">
+          <!-- Step 1 -->
+          <div class="eco-step" data-cc-id="cc-4">
+            <div class="step-num">Step 1</div>
+            <h3>Event / Market Extraction</h3>
+            <div class="eco-inner">
+              <div style="font-weight:600; font-size:11px; line-height:1.2;">Who will be the US Open Men's Tennis Champion 2025?</div>
+              <div class="market-row"><span>Market 1 · Jannik Sinner</span><span class="price">$0.57</span></div>
+              <div class="market-row win"><span>Market 2 · Carlos Alcaraz</span><span class="price">$0.43</span></div>
+              <div class="eco-caption">Outcome · Carlos Alcaraz ✓</div>
+            </div>
+
+            <div class="eco-submix">
+              <div class="submix-label">Event category distribution</div>
+              <ul class="cat-dist">
+                <li>
+                  <span class="sw" style="background:oklch(0.62 0.14 255)"></span>
+                  <span class="cat-name">Sports</span>
+                  <span class="cat-pct">25%</span>
+                </li>
+                <li>
+                  <span class="sw" style="background:oklch(0.72 0.10 255)"></span>
+                  <span class="cat-name">Politics</span>
+                  <span class="cat-pct">25%</span>
+                </li>
+                <li>
+                  <span class="sw" style="background:oklch(0.62 0.14 65)"></span>
+                  <span class="cat-name">Entertainment</span>
+                  <span class="cat-pct">25%</span>
+                </li>
+                <li>
+                  <span class="sw" style="background:oklch(0.80 0.05 85)"></span>
+                  <span class="cat-name">Others</span>
+                  <span class="cat-pct">25%</span>
+                </li>
+              </ul>
+            </div>
+            <div class="eco-arrow"></div>
+          </div>
+          <!-- Step 2 (split: context vs agent loop) -->
+          <div class="eco-step split">
+            <div class="sub primary">
+              <div class="step-num">Step 2a</div>
+              <h3>Prediction Context Construction</h3>
+              <div class="eco-inner" data-cc-id="cc-1">
+                <div style="display:flex; gap:4px; flex-wrap:wrap;" data-cc-id="cc-4">
+                  <span class="chip">Web Search</span>
+                  <span class="chip">News</span>
+                  <span class="chip amber" data-cc-id="cc-5" style="">Human Insight</span>
+                </div>
+                <div class="prompt-box" data-cc-id="cc-3">
+                  <div data-cc-id="cc-2" style=""><span class="tag">[system]</span> You are an expert predictor…</div>
+                  <div data-cc-id="cc-6" style=""><span class="tag">[markets]</span> Sinner &amp; Alcaraz…</div>
+                  <div><span class="tag">[news]</span> ESPN reports…</div>
+                  <div><span class="tag">[odds]</span> $0.57 for YES…</div>
+                </div>
+              </div>
+              <div class="eco-arrow"></div>
+            </div>
+
+            <div class="sub">
+              <div class="step-num">Step 2b · Agent Loop</div>
+              <h3>Self-directed Context</h3>
+              <div class="eco-inner">
+                <div class="agent-loop">
+                  <div class="al-row">
+                    <span class="al-node">Plan</span>
+                    <span class="al-arr">→</span>
+                    <span class="al-node tool">🔍 Search</span>
+                    <span class="al-arr">→</span>
+                    <span class="al-node tool">📰 Fetch</span>
+                  </div>
+                  <div class="al-loop-line"></div>
+                </div>
+              </div>
+              <div class="eco-arrow"></div>
+            </div>
+          </div>
+          <!-- Step 3 + Step 4 (split) -->
+          <div class="eco-step split">
+            <div class="sub primary">
+              <div class="step-num">Step 3</div>
+              <h3>Probabilistic<br>Prediction</h3>
+              <div class="eco-inner">
+                <div style="display:flex; gap:4px; flex-wrap:wrap;">
+                  <span class="chip">Reason</span>
+                  <span class="chip">Knowledge</span>
+                  <span class="chip">Tool Use</span>
+                </div>
+                <div class="pred-bars">
+                  <div class="pred-bar"><span class="fill" style="width:48%"></span><span>Sinner &nbsp; 48%</span></div>
+                  <div class="pred-bar"><span class="fill" style="width:52%; background:oklch(0.92 0.05 155)"></span><span>Alcaraz &nbsp; 52%</span></div>
+                </div>
+                <div class="rationale"><span class="r-tag">rationale</span> I think Sinner will win because <em>Source xxx</em>…</div>
+              </div>
+            </div>
+            <div class="sub">
+              <div class="step-num">Step 4</div>
+              <h3>Evaluation</h3>
+              <div class="eco-inner" style="min-height:0; padding:3px;">
+                <div class="tri-wrap">
+                  <svg class="tri" viewBox="0 0 160 140" aria-label="Three evaluation dimensions">
+                    <defs>
+                      <linearGradient id="triFill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="oklch(0.94 0.03 255)" stop-opacity="0.9"></stop>
+                        <stop offset="100%" stop-color="oklch(0.94 0.03 255)" stop-opacity="0.4"></stop>
+                      </linearGradient>
+                    </defs>
+                    <polygon points="80,40 118,102 42,102" fill="url(#triFill)" stroke="oklch(0.45 0.14 255)" stroke-width="1.5"></polygon>
+                    <circle cx="80" cy="40" r="3.5" fill="oklch(0.45 0.14 255)"></circle>
+                    <circle cx="118" cy="102" r="3.5" fill="oklch(0.45 0.14 255)"></circle>
+                    <circle cx="42" cy="102" r="3.5" fill="oklch(0.45 0.14 255)"></circle>
+                    <text x="80" y="26" text-anchor="middle" font-family="Inter, sans-serif" font-size="13" font-weight="700" fill="oklch(0.45 0.14 255)">Accuracy</text>
+                    <text x="155" y="123" text-anchor="end" font-family="Inter, sans-serif" font-size="13" font-weight="700" fill="oklch(0.45 0.14 255)">Return</text>
+                    <text x="5" y="123" text-anchor="start" font-family="Inter, sans-serif" font-size="13" font-weight="700" fill="oklch(0.45 0.14 255)">Calibration</text>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ========== MIDDLE COLUMN ========== -->
+    <div class="col">
+
+      <section class="card">
+        <div class="section-head">
+          <span class="section-kicker"><span class="num">04</span>Main Results</span>
+          <h2 class="section-title">13 models, 7 agents, 3,800+ events</h2>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat"><div class="v">13</div><div class="k">Base LLMs</div></div>
+          <div class="stat"><div class="v">7</div><div class="k">Agent Systems</div></div>
+          <div class="stat"><div class="v">3,800+</div><div class="k">Forecast Events</div></div>
+        </div>
+
+        <svg class="leaderboard-chart" viewBox="0 0 720 190" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-label="Top LLMs ranked by 1 minus Brier Score">
+          <!-- Rotated Y-axis legend -->
+          <text x="14" y="74" transform="rotate(-90 14 74)" text-anchor="middle" class="axis-title">1 − Brier Score  ↑</text>
+
+          <!-- Gridlines -->
+          <line class="axis-grid" x1="70" y1="20" x2="700" y2="20"></line>
+          <line class="axis-grid" x1="70" y1="63" x2="700" y2="63"></line>
+          <line class="axis-grid" x1="70" y1="106" x2="700" y2="106"></line>
+          <line class="axis-base" x1="70" y1="128" x2="700" y2="128"></line>
+
+          <!-- Y-axis tick labels -->
+          <text x="64" y="23" text-anchor="end" class="axis-tick">0.920</text>
+          <text x="64" y="66" text-anchor="end" class="axis-tick">0.910</text>
+          <text x="64" y="109" text-anchor="end" class="axis-tick">0.900</text>
+          <text x="64" y="131" text-anchor="end" class="axis-tick">0.895</text>
+
+          <!-- Bar 1 · Claude Opus 4.5 · 0.9142 ± 0.0036 -->
+          <rect class="bar-anthropic" x="90" y="45" width="50" height="83"></rect>
+          <text class="value" x="115" y="56" text-anchor="middle">0.9142</text>
+          <text class="value-se" x="115" y="66" text-anchor="middle">(±0.0036)</text>
+          <image x="105" y="134" width="20" height="20" href="images/icons/claude.svg"></image>
+          <text class="model-name" x="115" y="162" text-anchor="middle">Claude Opus</text>
+          <text class="model-sub" x="115" y="174" text-anchor="middle">4.5</text>
+
+          <!-- Bar 2 · GPT-5.2 (none) · 0.9136 ± 0.0036 -->
+          <rect class="bar-openai" x="180" y="48" width="50" height="80"></rect>
+          <text class="value" x="205" y="59" text-anchor="middle">0.9136</text>
+          <text class="value-se" x="205" y="69" text-anchor="middle">(±0.0036)</text>
+          <image x="195" y="134" width="20" height="20" href="images/icons/openai.svg"></image>
+          <text class="model-name" x="205" y="162" text-anchor="middle">GPT-5.2</text>
+          <text class="model-sub" x="205" y="174" text-anchor="middle">(none)</text>
+
+          <!-- Bar 3 · GPT-5.2 (high) · 0.9133 ± 0.0036 -->
+          <rect class="bar-openai" x="270" y="49" width="50" height="79"></rect>
+          <text class="value" x="295" y="60" text-anchor="middle">0.9133</text>
+          <text class="value-se" x="295" y="70" text-anchor="middle">(±0.0036)</text>
+          <image x="285" y="134" width="20" height="20" href="images/icons/openai.svg"></image>
+          <text class="model-name" x="295" y="162" text-anchor="middle">GPT-5.2</text>
+          <text class="model-sub" x="295" y="174" text-anchor="middle">(high)</text>
+
+          <!-- Bar 4 · Foresight V3 · 0.9126 ± 0.0087 -->
+          <rect class="bar-foresight" x="360" y="52" width="50" height="76"></rect>
+          <text class="value" x="385" y="63" text-anchor="middle">0.9126</text>
+          <text class="value-se" x="385" y="73" text-anchor="middle">(±0.0087)</text>
+          <image x="375" y="134" width="20" height="20" href="images/icons/lightningrod.svg"></image>
+          <text class="model-name" x="385" y="162" text-anchor="middle">Foresight</text>
+          <text class="model-sub" x="385" y="174" text-anchor="middle">V3</text>
+
+          <!-- Bar 5 · Gemini 3 Pro (Preview) · 0.9104 ± 0.0044 -->
+          <rect class="bar-gemini" x="450" y="61" width="50" height="67"></rect>
+          <text class="value" x="475" y="72" text-anchor="middle">0.9104</text>
+          <text class="value-se" x="475" y="82" text-anchor="middle">(±0.0044)</text>
+          <image x="465" y="134" width="20" height="20" href="images/icons/gemini.svg"></image>
+          <text class="model-name" x="475" y="162" text-anchor="middle">Gemini 3 Pro</text>
+          <text class="model-sub" x="475" y="174" text-anchor="middle">(Preview)</text>
+
+          <!-- Bar 6 · Kimi K2 (Thinking) · 0.9100 ± 0.0039 -->
+          <rect class="bar-kimi" x="540" y="63" width="50" height="65"></rect>
+          <text class="value" x="565" y="74" text-anchor="middle">0.9100</text>
+          <text class="value-se" x="565" y="84" text-anchor="middle">(±0.0039)</text>
+          <image x="555" y="134" width="20" height="20" href="images/icons/kimi.svg"></image>
+          <text class="model-name" x="565" y="162" text-anchor="middle">Kimi K2</text>
+          <text class="model-sub" x="565" y="174" text-anchor="middle">(Thinking)</text>
+
+          <!-- Bar 7 · Claude Sonnet 4.5 · 0.9091 ± 0.0037 -->
+          <rect class="bar-anthropic" x="630" y="67" width="50" height="61"></rect>
+          <text class="value" x="655" y="78" text-anchor="middle">0.9091</text>
+          <text class="value-se" x="655" y="88" text-anchor="middle">(±0.0037)</text>
+          <image x="645" y="134" width="20" height="20" href="images/icons/claude.svg"></image>
+          <text class="model-name" x="655" y="162" text-anchor="middle">Claude Sonnet</text>
+          <text class="model-sub" x="655" y="174" text-anchor="middle">4.5</text>
+        </svg>
+
+        <table class="results-table">
+          <thead>
+            <tr><th>System</th><th>Brier&nbsp;↓</th><th>ECE&nbsp;↓</th><th>Return&nbsp;↑</th></tr>
+          </thead>
+          <tbody>
+            <tr class="market">
+              <td><span class="kind">Baseline</span>Market (human)</td>
+              <td class="mono">0.1494</td>
+              <td class="mono">0.0799</td>
+              <td class="mono">100.00%</td>
+            </tr>
+            <tr class="best">
+              <td><span class="kind">Best Agent</span>Gemini 3 Agent</td>
+              <td class="mono">0.0718</td>
+              <td class="mono">0.0217</td>
+              <td class="mono">89.67%</td>
+            </tr>
+            <tr class="best-llm">
+              <td><span class="kind">Best LLM</span>Claude Opus 4.5</td>
+              <td class="mono">0.0858</td>
+              <td class="mono">0.0350</td>
+              <td class="mono">85.10%</td>
+            </tr>
+            <tr class="best-os">
+              <td><span class="kind">Best OSS LLM</span>Deepseek V3.2</td>
+              <td class="mono">0.1032</td>
+              <td class="mono">0.0380</td>
+              <td class="mono">81.37%</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p style="margin-top: 8px; font-size: 14px; line-height:1.38;">
+          <strong>Agents beat base LLMs on both accuracy and calibration</strong> — but no system yet matches the human market baseline on return. The gap is narrowing; calibration remains the frontier.
+        </p>
+      </section>
+
+      <section class="card">
+        <div class="section-head">
+          <span class="section-kicker"><span class="num">05</span>Diverse Metrics</span>
+          <h2 class="section-title">Diverse Metrics</h2>
+        </div>
+
+        <p style="font-size:13.5px; color:var(--ink-2); margin-bottom:8px;">
+          For a forecast event with binary markets <span class="math">j ∈ {1,…,m<sub>i</sub>}</span>,
+          predicted probability <span class="math">p<sub>ij</sub></span>, resolved as
+          <span class="math">o<sub>ij</sub> ∈ {0,1}</span>.
+        </p>
+
+        <div class="metric-row">
+          <div class="metric">
+            <h3><span class="num">M1</span> Brier Score <span style="font-size:11.5px; color:var(--muted); font-weight:400; margin-left:auto;">accuracy</span></h3>
+            <div class="formula">
+              BS<span class="sub">i</span> &nbsp;=&nbsp; (1 / m<span class="sub">i</span>) Σ<span class="sub">j</span> (p<span class="sub">ij</span> − o<span class="sub">ij</span>)<span class="sup">2</span>
+            </div>
+          </div>
+          <div class="metric">
+            <h3><span class="num">M2</span> Calibration Error <span style="font-size:11.5px; color:var(--muted); font-weight:400; margin-left:auto;">calibration</span></h3>
+            <div class="formula">
+              ECE = (1/m) Σ<span class="sub">k</span> | Pr(o=1 | p=p̃<span class="sub">k</span>) − p̃<span class="sub">k</span> |
+            </div>
+          </div>
+        </div>
+
+        <div class="metric">
+          <h3><span class="num">M3</span> Market Return <span style="font-size:11.5px; color:var(--muted); font-weight:400; margin-left:auto;">economic value</span></h3>
+          <p>Fixed-betting strategy: compare model probability <span class="math">p<sub>ij</sub></span> to market price <span class="math">q<sub>ij</sub></span>, wager <span class="math">$1</span> on the market with the largest edge <span class="math">p<sub>ij</sub>/q<sub>ij</sub></span>, and average payoff against <span class="math">o<sub>ij</sub></span>.</p>
+        </div>
+      </section>
+
+      <section class="card tint">
+        <div class="section-head">
+          <span class="section-kicker"><span class="num">06</span>Key Observations</span>
+          <h2 class="section-title">Key Observations</h2>
+        </div>
+        <div class="obs-split">
+          <div class="obs-left">
+            <ul class="takeaways">
+              <li>
+                <span class="badge">1</span>
+                <span>
+                  <span class="t-title">Market Data.</span>
+                  <span class="t-body">Including <em class="hl">(human) prediction market data</em> into the context helps improve prediction accuracy.</span>
+                </span>
+              </li>
+              <li>
+                <span class="badge">2</span>
+                <span>
+                  <span class="t-title">Short-term (In)accuracy.</span>
+                  <span class="t-body">Models struggle to match market accuracy <em class="hl">close to resolution time</em>.</span>
+                </span>
+              </li>
+              <li>
+                <span class="badge">3</span>
+                <span>
+                  <span class="t-title">Where can models improve?</span>
+                  <span class="t-body"><em class="hl">Source finding</em> and <em class="hl">evidence extraction</em> — pulling the most relevant information from the available sources.</span>
+                </span>
+              </li>
+            </ul>
+          </div>
+          <div class="obs-right">
+            <figure class="obs-fig">
+              <img src="images/data_source_comparison.svg" alt="Context source comparison" class="obs-img">
+              <figcaption>Obs 1 · Context source comparison</figcaption>
+            </figure>
+            <figure class="obs-fig">
+              <img src="images/time_bins_brier_score.svg" alt="Brier score vs. time to resolution" class="obs-img">
+              <figcaption>Obs 2 · Brier score vs. time to resolution</figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ========== RIGHT COLUMN ========== -->
+    <div class="col">
+
+      <section class="card">
+        <div class="section-head">
+          <span class="section-kicker" data-cc-id="cc-8" style=""><span class="num">07</span>AI Forecasting Ecosystem</span>
+          <h2 class="section-title">Beyond the benchmark</h2>
+        </div>
+
+        <div class="ext-item">
+          <div class="ext-thumb">TRADING<br>ENV PLOT</div>
+          <div>
+            <span class="kicker">Environment</span>
+            <h3>Trading Environment</h3>
+            <p>A simulated prediction-market environment that turns a forecast into a sequence of bets — letting us score agents on portfolio return, drawdown, and Sharpe-style risk, not just scalar accuracy.</p>
+          </div>
+        </div>
+
+        <div class="ext-item">
+          <div class="ext-thumb">HACKATHON<br>LOGO</div>
+          <div>
+            <span class="kicker">Community</span>
+            <h3>Forecasting Hackathon</h3>
+            <p>A recurring open competition where teams ship agents against live markets. Shared leaderboard, shared data, new events weekly.</p>
+          </div>
+        </div>
+
+        <div class="ext-item">
+          <div class="ext-thumb">AGENT<br>DIAGRAM</div>
+          <div>
+            <span class="kicker">Agents</span>
+            <h3>AI-Prophet &amp; Mini-Prophet</h3>
+            <p><strong>AI-Prophet</strong> is our reference trading agent with retrieval, reasoning, and position-sizing. <strong>Mini-Prophet</strong> is a lightweight harness for rapid iteration on forecasting prompts.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-head">
+          <span class="section-kicker"><span class="num">08</span>Compare with Prior Benchmarks</span>
+          <h2 class="section-title">Compare with Prior Benchmarks</h2>
+        </div>
+        <p class="compare-note">
+          <em class="hl">Prophet Arena</em> is the only forecasting benchmark that simultaneously supports live events, probabilistic outputs, multi-horizon tasks, a modular agent stack, and return-based economic metrics.
+        </p>
+        <table class="compare-table">
+          <colgroup>
+            <col class="name-col">
+            <col class="feat-col">
+            <col class="feat-col">
+            <col class="feat-col">
+            <col class="feat-col">
+            <col class="feat-col">
+          </colgroup>
+          <thead>
+            <tr>
+              <th>Benchmark</th>
+              <th>Live<br>events</th>
+              <th>Proba-<br>bilistic</th>
+              <th>Multi-<br>horizon</th>
+              <th>Modu-<br>larized</th>
+              <th>Return<br>metrics</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>MIRAI</td>
+              <td class="no">—</td>
+              <td class="no">—</td>
+              <td class="yes">✓</td>
+              <td class="no">—</td>
+              <td class="no">—</td>
+            </tr>
+            <tr>
+              <td>ForecastBench</td>
+              <td class="yes">✓</td>
+              <td class="yes">✓</td>
+              <td class="yes">✓</td>
+              <td class="no">—</td>
+              <td class="no">—</td>
+            </tr>
+            <tr>
+              <td>FutureBench</td>
+              <td class="yes">✓</td>
+              <td class="no">—</td>
+              <td class="no">—</td>
+              <td class="no">—</td>
+              <td class="no">—</td>
+            </tr>
+            <tr class="ours">
+              <td>Prophet Arena</td>
+              <td class="yes">✓</td>
+              <td class="yes">✓</td>
+              <td class="yes">✓</td>
+              <td class="yes">✓</td>
+              <td class="yes">✓</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="card tint amber">
+        <div class="section-head">
+          <span class="section-kicker"><span class="num">09</span>Further Questions</span>
+          <h2 class="section-title">Further Questions</h2>
+        </div>
+        <ul class="questions">
+          <li>
+            <span class="q-badge">Q1</span>
+            <span class="q-text">How do we build a <em class="hl">stronger forecasting agent</em>?
+              <span class="q-opts">
+                <span class="opt">Tool access</span>
+                <span class="opt">Agentic pipelines</span>
+                <span class="opt">Fine-tuned models</span>
+                <span class="opt">Prompt engineering</span>
+              </span>
+            </span>
+          </li>
+          <li>
+            <span class="q-badge">Q2</span>
+            <span class="q-text">How do we design better <em class="hl">betting frameworks</em> to optimally convert <em class="hl">forecasts</em> into <em class="rust">profits</em>?</span>
+          </li>
+          <li>
+            <span class="q-badge">Q3</span>
+            <span class="q-text">How can AI help us grow an <em class="hl">ecosystem</em> that extends <em class="rust">beyond existing prediction markets</em>?</span>
+          </li>
+        </ul>
+      </section>
+
+    </div>
+
+  </main>
+
+</div>
+
+
+
+</body></html>
